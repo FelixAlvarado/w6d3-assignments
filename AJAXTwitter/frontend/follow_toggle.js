@@ -1,3 +1,5 @@
+const APIUtil = require('./api_util.js');
+
 class FollowToggle {
   constructor($el) {
     this.el = $el;
@@ -9,25 +11,41 @@ class FollowToggle {
 
   render() {
 
-    console.log(this.el);
     if (this.followState) {
       this.el.html("UNFOLLOW!");
     } else {
       this.el.html("FOLLOW!");
     }
-    console.log(this.el.innerHTML);
+
+
+
   }
 
   handleClick() {
     this.el.on('click', (event) => {
     event.preventDefault();
     let method;
-    if (this.followState) {
-      method = 'DELETE';
-    }else {
-      method = 'POST';
+    const that = this;
 
+    if (this.followState) {
+      APIUtil.unfollowUser(this.userId).then(() => {
+        that.followState = !that.followState;
+        that.render();
+      },
+      () => {
+        console.log('failed ajax!');
+      });
+    } else {
+      APIUtil.followUser(this.userId).then(() => {
+
+        that.followState = !that.followState;
+        that.render();
+      },
+      () => {
+        console.log('failed ajax!');
+      });
     }
+    // const that = this;
     // $.ajax({
     //   type: method,
     //   url: `/users/${this.userId}/follow`,

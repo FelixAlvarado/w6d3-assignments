@@ -71,12 +71,58 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./frontend/api_util.js":
+/*!******************************!*\
+  !*** ./frontend/api_util.js ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+
+
+const APIUtil = {
+
+  followUser: id => {
+    $.ajax({
+      type: 'POST',
+      url: `/users/${id}/follow`,
+      dataType: 'json',
+      success (){
+         console.log('just worked!!');
+      },
+      error(){
+         console.log('failed ajax!');
+      } ,
+    });
+  },
+  unfollowUser: id => {
+    $.ajax({
+      type: 'DELETE',
+      url: `/users/${id}/follow`,
+      dataType: 'json',
+      success (){
+         console.log('just worked!!');
+      },
+      error(){
+       console.log('failed ajax!');
+      } ,
+    });
+  },
+};
+
+module.exports = APIUtil;
+
+
+/***/ }),
+
 /***/ "./frontend/follow_toggle.js":
 /*!***********************************!*\
   !*** ./frontend/follow_toggle.js ***!
   \***********************************/
 /*! no static exports found */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+const APIUtil = __webpack_require__(/*! ./api_util.js */ "./frontend/api_util.js");
 
 class FollowToggle {
   constructor($el) {
@@ -89,25 +135,41 @@ class FollowToggle {
 
   render() {
 
-    console.log(this.el);
     if (this.followState) {
       this.el.html("UNFOLLOW!");
     } else {
       this.el.html("FOLLOW!");
     }
-    console.log(this.el.innerHTML);
+
+
+
   }
 
   handleClick() {
     this.el.on('click', (event) => {
     event.preventDefault();
     let method;
-    if (this.followState) {
-      method = 'DELETE';
-    }else {
-      method = 'POST';
+    const that = this;
 
+    if (this.followState) {
+      APIUtil.unfollowUser(this.userId).then(() => {
+        that.followState = !that.followState;
+        that.render();
+      },
+      () => {
+        console.log('failed ajax!');
+      });
+    } else {
+      APIUtil.followUser(this.userId).then(() => {
+
+        that.followState = !that.followState;
+        that.render();
+      },
+      () => {
+        console.log('failed ajax!');
+      });
     }
+    // const that = this;
     // $.ajax({
     //   type: method,
     //   url: `/users/${this.userId}/follow`,
